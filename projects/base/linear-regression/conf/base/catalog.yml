@@ -1,0 +1,10 @@
+# Here you can define all your data sets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+dataset:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/summary_of_weather.csv
+  load_args:
+    low_memory: False
