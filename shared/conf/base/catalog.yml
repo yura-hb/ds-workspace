@@ -2,3 +2,9 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+dataset:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/train.csv
+  load_args:
+    low_memory: False

@@ -15,3 +15,14 @@ addopts = """
 fail_under = 0
 show_missing = true
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.kedro.micropkg.package]
+# SKLearn
+"pipelines.sklearn.fold_split"={}
+"pipelines.sklearn.train_test_split"={}
+"pipelines.sklearn.train_lig_reg"={}
+"pipelines.sklearn.train_log_reg"={}
+# Pandas
+"pipelines.pandas.take_columns"={}
+"pipelines.pandas.make_info"={}
+"pipelines.pandas.drop_zero_columns"={}

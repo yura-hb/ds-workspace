@@ -34,4 +34,4 @@ loggers:
     level: INFO
 
 root:
-  handlers: [rich, info_file_handler]
+  handlers: [rich]

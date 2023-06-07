@@ -8,3 +8,19 @@ dataset:
   filepath: data/01_raw/summary_of_weather.csv
   load_args:
     low_memory: False
+
+X_train:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/X_train.pq
+
+X_test:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/X_test.pq
+
+y_train:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/y_train.pq
+
+y_test:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/y_test.pq
