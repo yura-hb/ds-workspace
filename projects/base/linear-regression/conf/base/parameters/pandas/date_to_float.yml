@@ -1,0 +1,13 @@
+# This is a boilerplate parameters config generated for pipeline 'date_to_float'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+data_preprocess.date_to_float_parameters:
+  columns: ['Date']
+  # Possible values are 'skip|index_by_year|no'
+  # * `skip` normalization wouldn't add year to resulting date
+  # * `index_by_year` normalization will add year assuming that the first year starts at date 0
+  # * `no` adds original date of year
+  normalize: 'index_by_year'

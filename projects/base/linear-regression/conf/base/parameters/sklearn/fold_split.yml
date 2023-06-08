@@ -4,6 +4,6 @@
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
 
-fold_split_parameters:
+split.fold_split_parameters:
   shuffle: True
   random_state: 42

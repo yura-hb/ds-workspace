@@ -1,0 +1,15 @@
+# This is a boilerplate parameters config generated for pipeline 'plot_corr_matrix'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+data_preprocess.plot_corr_matrix_parameters:
+  columns: ['WindGustSpd', 'PGT', 'SPD', 'Snowfall', 'DR', 'Date', 'SND',
+       'is_traceable_precip', 'is_traceable_snow', 'thunder', 'sleet', 'hail',
+       'dust', 'smoke', 'blowing_snow', 'rain', 'snow', 'glaze', 'fog',
+       'is_observed']
+  method: 'spearman'
+  round_positions: 2
+  # Set to True to plot all columns
+  all: False

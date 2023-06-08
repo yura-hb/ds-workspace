@@ -1,0 +1,16 @@
+# This is a boilerplate parameters config generated for pipeline 'one_hot_encode'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+# Mimic configuration of pandas get_dummies method
+# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.get_dummies.html
+
+one_hot_encode_parameters:
+  prefix: ""
+  prefix_sep: "_"
+  dummy_na: False
+  columns: []
+  sparse: False
+  drop_first: False

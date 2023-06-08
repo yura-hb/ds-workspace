@@ -1,0 +1,11 @@
+# This is a boilerplate parameters config generated for pipeline 'fill_na'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+# Parameters from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.fillna.html
+
+fill_na_parameters:
+  value: 0
+  # method

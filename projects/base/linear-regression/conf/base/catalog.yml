@@ -9,18 +9,27 @@ dataset:
   load_args:
     low_memory: False
 
-X_train:
+data_preprocess.X:
+  type: pandas.ParquetDataSet
+  filepath: data/02_intermediate/X.pq
+
+split.X_train:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/X_train.pq
 
-X_test:
+split.X_test:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/X_test.pq
 
-y_train:
+split.y_train:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/y_train.pq
 
-y_test:
+split.y_test:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/y_test.pq
+
+data_preprocess.X_corr_matrix_fig:
+  type: plotly.JSONDataSet
+  filepath: data/08_reporting/X_corr_matrix.json
+  versioned: true

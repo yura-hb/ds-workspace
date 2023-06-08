@@ -21,3 +21,10 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 "../../../shared/dist/make_info-0.2.tar.gz" = {alias="make_info", destination = "shared"}
 "../../../shared/dist/train_test_split-0.2.tar.gz" = {alias="train_test_split", destination = "shared"}
 "../../../shared/dist/fold_split-0.1.tar.gz" = {alias="fold_split", destination = "shared"}
+"../../../shared/dist/drop_zero_columns-0.1.tar.gz" = {alias="drop_zero_columns", destination = "shared"}
+"../../../shared/dist/drop_constant_columns-0.1.tar.gz" = {alias="drop_constant_columns", destination = "shared"}
+"../../../shared/dist/drop_columns-0.1.tar.gz" = {alias="drop_columns", destination = "shared"}
+"../../../shared/dist/one_hot_encode-0.1.tar.gz" = {alias="one_hot_encode", destination = "shared"}
+"../../../shared/dist/date_to_float-0.1.tar.gz" = {alias="date_to_float", destination = "shared"}
+"../../../shared/dist/fill_na-0.1.tar.gz" = {alias="fill_na", destination = "shared"}
+"../../../shared/dist/plot_corr_matrix-0.1.tar.gz" = {alias="plot_corr_matrix", destination = "shared"}

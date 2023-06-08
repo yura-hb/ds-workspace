@@ -15,7 +15,7 @@ def drop_zero_columns(dataset: pd.DataFrame, parameters: Dict) -> pd.DataFrame:
     for column in dataset.columns:
         is_na = dataset[column].isna().sum()
 
-        if ((all - is_na) / all) > ratio:
+        if ((all - is_na) / all) <= ratio:
             drop_columns += [column]
 
     return dataset.drop(drop_columns, axis=1)

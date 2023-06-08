@@ -26,3 +26,11 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 "pipelines.pandas.take_columns"={}
 "pipelines.pandas.make_info"={}
 "pipelines.pandas.drop_zero_columns"={}
+"pipelines.pandas.drop_constant_columns"={}
+"pipelines.pandas.drop_corr_columns"={}
+"pipelines.pandas.drop_columns"={}
+"pipelines.pandas.date_to_float"={}
+"pipelines.pandas.one_hot_encode"={}
+"pipelines.pandas.fill_na"={}
+# Plotly
+"pipelines.plotly.plot_corr_matrix"={}
