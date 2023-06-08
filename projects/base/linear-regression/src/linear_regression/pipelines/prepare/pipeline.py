@@ -20,6 +20,7 @@ import linear_regression.shared.plot_corr_matrix.pipeline as plot_corr_matrix
 import linear_regression.shared.fill_na.pipeline as fill_na
 import linear_regression.shared.drop_constant_columns.pipeline as drop_constant_columns
 
+
 def make_preprocess_pipeline(**kwargs) -> Pipeline:
     return pipeline([
         # X preprocessing
@@ -29,11 +30,11 @@ def make_preprocess_pipeline(**kwargs) -> Pipeline:
         node(process,
              inputs=['X_orig'],
              outputs='X_encoded_0'),
-        modular_pipeline(one_hot_encode.create_pipeline(),
-                         inputs={"dataset": "X_encoded_0"},
-                         outputs={"dataset_out": "X_encoded_1"}),
+        # modular_pipeline(one_hot_encode.create_pipeline(),
+        #                  inputs={"dataset": "X_encoded_0"},
+        #                  outputs={"dataset_out": "X_encoded_1"}),
         modular_pipeline(date_to_float.create_pipeline(),
-                         inputs={"dataset": "X_encoded_1"},
+                         inputs={"dataset": "X_encoded_0"},
                          outputs={"dataset_out": "X_encoded_2"}),
         modular_pipeline(drop_zero_columns.create_pipeline(),
                          inputs={"dataset": "X_encoded_2"},

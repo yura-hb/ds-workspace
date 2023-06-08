@@ -5,4 +5,4 @@
 # Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
 
 data_preprocess.drop_columns_parameters:
-  columns: ['MIN', 'MAX', 'MEA', 'PoorWeather', 'STA', 'YR', 'DA', 'MO', 'PRCP', 'Precip', 'SNF', 'SPD']
+  columns: ['MIN', 'MAX', 'MEA', 'PoorWeather', 'YR', 'DA', 'MO', 'PRCP', 'Precip', 'SNF', 'SPD']

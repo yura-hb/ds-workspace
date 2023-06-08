@@ -20,7 +20,7 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 "../../../shared/dist/take_columns-0.2.tar.gz" = {alias="take_columns", destination = "shared"}
 "../../../shared/dist/make_info-0.2.tar.gz" = {alias="make_info", destination = "shared"}
 "../../../shared/dist/train_test_split-0.2.tar.gz" = {alias="train_test_split", destination = "shared"}
-"../../../shared/dist/fold_split-0.1.tar.gz" = {alias="fold_split", destination = "shared"}
+"../../../shared/dist/fold_split-0.2.tar.gz" = {alias="fold_split", destination = "shared"}
 "../../../shared/dist/drop_zero_columns-0.1.tar.gz" = {alias="drop_zero_columns", destination = "shared"}
 "../../../shared/dist/drop_constant_columns-0.1.tar.gz" = {alias="drop_constant_columns", destination = "shared"}
 "../../../shared/dist/drop_columns-0.1.tar.gz" = {alias="drop_columns", destination = "shared"}

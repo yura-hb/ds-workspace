@@ -7,3 +7,5 @@
 fold_split_parameters:
   shuffle: True
   random_state: 42
+  group_column: None
+  stratify: False
