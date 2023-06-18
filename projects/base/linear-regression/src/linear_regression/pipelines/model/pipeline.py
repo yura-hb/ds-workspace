@@ -12,6 +12,7 @@ import linear_regression.shared.train.pipeline as train_pipeline
 
 
 def average_distance_metric(y_true, y_pred, squared: bool = False):
+    y_true = y_true.to_numpy().reshape(-1)
     mean = float(np.mean(y_true - y_pred))
 
     return np.sqrt(mean) if squared else mean
@@ -23,12 +24,15 @@ def train_on_split_pipeline(split: int = 0) -> Pipeline:
 
     inputs_map = {"X_train": X_train_key, "X_test": X_valid_key, "y_train": y_train_key, "y_test": y_valid_key}
 
+    optuna_cnf = train_pipeline.OptunaConfiguration
+
     configuration = train_pipeline.Configuration(
         metrics={
             'average_distance': average_distance_metric
         },
         optuna_configuration=train_pipeline.OptunaConfiguration(
-            study_name=f"split_{split}"
+            study_name=f"split_{split}",
+            result=optuna_cnf.Result(kind=optuna_cnf.Result.Kind.top_k_per_class_models, value=5)
         )
     )
 

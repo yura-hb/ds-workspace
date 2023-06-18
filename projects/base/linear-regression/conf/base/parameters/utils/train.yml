@@ -16,14 +16,15 @@ train_parameters: &params
     #   class:
     #     optimize: True
     #     type: categorical
-    #     values: ['sklearn.model_one', 'custom.model_1', ...]
+    #     parameters:
+    #       choices: ['sklearn.model_one', 'custom.model_1', ...]
     #   parameters:
     #     sklearn.model_one:
     #       alpha: ...
     # ```
     #   Note, that you must always specify hyperparameter optimization, even if parameters aren't affected
     # * `custom.model`, which specifies custom model
-    class: 'sklearn.linear_model.Ridge'
+    class: 'multi-model'
     # Parameters of the model to train. If you want to perform optimization, you must specify the parameter in
     # the following form
     # ```
@@ -38,22 +39,55 @@ train_parameters: &params
     # Possible value for optimized value parameters can be found in official docs:
     # https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html#optuna.trial.Trial
     parameters:
-      alpha:
+      class:
         optimize: True
-        type: float
+        type: categorical
         parameters:
-          low: 0.0
-          high: 1.0
-      fit_intercept:
-        optimize: True
-        type: bool
-      copy_X: True
-      tol: 0.0001
-      solver: 'auto'
-      positive:
-        optimize: True
-        type: bool
-      random_state: 42
+          choices: ['sklearn.linear_model.Ridge', 'sklearn.linear_model.ElasticNet']
+      parameters:
+        sklearn.linear_model.ElasticNet:
+          alpha:
+            optimize: True
+            type: float
+            parameters:
+              low: 0.0
+              high: 1.0
+          l1_ratio:
+            optimize: True
+            type: float
+            parameters:
+              low: 0.0
+              high: 1.0
+          fit_intercept:
+            optimize: True
+            type: bool
+          max_iter:
+            optimize: True
+            type: int
+            parameters:
+              low: 0
+              high: 1000
+          positive:
+            optimize: True
+            type: bool
+
+        sklearn.linear_model.Ridge:
+          alpha:
+            optimize: True
+            type: float
+            parameters:
+              low: 0.0
+              high: 1.0
+          fit_intercept:
+            optimize: True
+            type: bool
+          copy_X: True
+          tol: 0.0001
+          solver: 'auto'
+          positive:
+            optimize: True
+            type: bool
+          random_state: 42
 
   # A list of metrics to compute.
   # The metric is defined in format `namespace.name`.
@@ -103,9 +137,12 @@ train_parameters: &params
       class: 'GridSampler'
       parameters:
         search_space:
-          alpha: [0.0, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+          class: ['sklearn.linear_model.Ridge', 'sklearn.linear_model.ElasticNet']
+          alpha: [0.2, 0.6] #[0.0, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
           fit_intercept: [True, False]
           positive: [True, False]
+          l1_ratio: [0.1, 0.5] #[0.01, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+          max_iter: [1000] #[100, 200, 500, 1000]
         seed: 42
 
     # Read optuna docs

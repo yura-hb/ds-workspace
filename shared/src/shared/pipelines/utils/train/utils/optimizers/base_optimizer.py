@@ -16,12 +16,18 @@ class BaseOptimizer(ABC):
     def optimize(self, X_train, X_test, y_train, y_test):
         pass
 
+    @property
+    @abstractmethod
+    def result(self):
+        pass
+
     def make_model(self, parameters: Dict) -> BaseModel:
         cls = parameters['class']
         components = cls.split('.')
         prefix, model_name = components[0], '.'.join(components[1:])
 
         model_parameters = parameters['parameters']
+        args = (model_parameters, self.parameters['metrics'], self.configuration)
 
         match prefix:
             case 'multi-model':
@@ -34,8 +40,8 @@ class BaseOptimizer(ABC):
 
                 return self.make_model(new_parameters)
             case 'sklearn':
-                return SKLearnModel(model_name, model_parameters, self.configuration)
+                return SKLearnModel(cls, *args)
             case 'custom':
-                return self.configuration.model[model_name](model_parameters, self.configuration)
+                return self.configuration.model[model_name](model_parameters, *args)
             case '_':
                 pass

@@ -3,13 +3,17 @@ import logging
 from typing import Tuple, Dict
 
 import optuna
-
+import copy
 
 from .base_optimizer import BaseOptimizer
-from ..load_class import load_class, load_constructor
+from ..reflection_utils import load_obj, load_constructor
+
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
+
+
+multi_model_key = 'multi-model'
 
 
 class OptunaOptimizer(BaseOptimizer):
@@ -18,19 +22,26 @@ class OptunaOptimizer(BaseOptimizer):
         super().__init__(parameters, configuration)
 
         self.study = None
+        self.optimization_result = None
 
     def optimize(self, X_train, X_test, y_train, y_test):
         study, optimize_parameters = self.__make_study__()
+        datasets = (X_train, X_test, y_train, y_test)
 
         self.study = study
 
         def objective(trial):
-            parameters = self.__make_parameters__(trial)
-            model = self.make_model(parameters)
+            model = self.__train_model__(datasets, trial)
 
             return model.ordered_metrics
 
         study.optimize(objective, **optimize_parameters)
+
+        self.optimization_result = self.__make_optimization_result__(datasets, study)
+
+    @property
+    def result(self):
+        return self.optimization_result
 
     def __make_study__(self) -> Tuple[optuna.Study, Dict]:
         optuna.logging.enable_propagation()
@@ -42,14 +53,13 @@ class OptunaOptimizer(BaseOptimizer):
             storage=optuna_parameters.get('storage'),
             sampler=self.__make_sampler__(optuna_parameters),
             pruner=self.__make_pruner__(optuna_parameters),
-            study_name=optuna_parameters.get('study_name'),
+            study_name=self.configuration.optuna_configuration.study_name or optuna_parameters.get('study_name'),
             load_if_exists=optuna_parameters.get('load_if_exists'),
             direction=optuna_parameters.get('direction'),
             directions=optuna_parameters.get('directions')
         )
 
-        # TODO: - Implement better postprocessing
-        study.set_metric_names(self.parameters['metrics'].keys())
+        study.set_metric_names(optuna_parameters['metric_names'])
 
         optimize_params = dict(n_jobs=self.parameters.get('n_jobs') or 1,
                                n_trials=self.parameters.get('n_trials'),
@@ -63,8 +73,8 @@ class OptunaOptimizer(BaseOptimizer):
             optuna.pruners,
             'BasePruner',
             'pruner',
-            self.configuration.pruner,
-            self.configuration.pruner_parameters,
+            self.configuration.optuna_configuration.pruner,
+            self.configuration.optuna_configuration.pruner_parameters,
             parameters
         )
 
@@ -73,8 +83,8 @@ class OptunaOptimizer(BaseOptimizer):
             optuna.samplers,
             'BaseSampler',
             'sampler',
-            self.configuration.sampler,
-            self.configuration.sampler_parameters,
+            self.configuration.optuna_configuration.sampler,
+            self.configuration.optuna_configuration.sampler_parameters,
             parameters
         )
 
@@ -87,9 +97,9 @@ class OptunaOptimizer(BaseOptimizer):
         if cls == 'custom':
             return custom_value
 
-        object_class = load_class(module, cls)
+        object_class = load_obj(module, cls)
 
-        parameters = configuration['parameters']
+        parameters = configuration[key]['parameters']
 
         for key, value in custom_args:
             # A custom merge of two dictionaries to propagate custom parameters for nested object
@@ -103,26 +113,96 @@ class OptunaOptimizer(BaseOptimizer):
         # will have nested specification.
         signature = load_constructor(object_class)
 
-        for key, parameter in signature.parameters:
-            if base_class_key in parameter.annotation and key in parameters and parameters[key] is dict:
+        for key, parameter in signature.parameters.items():
+            # Skip parameter without annotation (For optuna it is self)
+            if parameter.annotation == parameter.empty:
+                continue
+
+            # TODO: - Improve the solution with type search
+            if base_class_key in str(parameter.annotation) and key in parameters and parameters[key] is dict:
                 parameters[key] = self.__make_optuna_object__(
                     module, base_class_key, key, None, None, parameters[key]
                 )
 
         return object_class(**parameters)
 
+    def __make_optimization_result__(self, datasets, study):
+        result_info = self.configuration.optuna_configuration.result
+        kind = result_info.kind
+
+        trials = []
+
+        match kind:
+            case kind.best_model:
+                trials = [study.best_trials[0]]
+            case kind.best_per_class_models:
+                assert self.parameters['model']['class'] == multi_model_key
+
+                returned_trials = set()
+
+                def filter_key(trial):
+                    nonlocal returned_trials
+
+                    key = trial.params['class']
+                    is_returned = key in returned_trials
+                    returned_trials.add(key)
+
+                    return is_returned
+
+                trials = sorted(study.trials, key=lambda x: x.values)
+                trials = filter(filter_key, trials)
+            case kind.top_k_models:
+                suffix = min(len(study.trials), result_info.value)
+                trials = sorted(study.trials, key=lambda x: x.values)[:suffix]
+            case kind.top_k_per_class_models:
+                assert self.parameters['model']['class'] == multi_model_key
+
+                max_trials = result_info.value
+                returned_trials = dict()
+
+                def filter_key(trial):
+                    nonlocal returned_trials
+
+                    key = trial.params['class']
+                    returned_trials[key] = (returned_trials.get(key) or 0) + 1
+
+                    return returned_trials[key] < max_trials
+
+                trials = sorted(study.trials, key=lambda x: x.values)
+                trials = filter(filter_key, trials)
+            case _:
+                raise ValueError(f'Unknown kind for result {result_info.value}')
+
+        models = [self.__train_model__(datasets, trial) for trial in trials]
+        parameters = [trial.params for trial in trials]
+        metrics = [trial.values for trial in trials]
+
+        return models, parameters, metrics
+
+    def __train_model__(self, datasets, trial):
+        parameters = self.__make_parameters__(trial)
+        model = self.make_model(parameters)
+
+        model.train(*datasets)
+
+        return model
+
     def __make_parameters__(self, trial: optuna.Trial) -> Dict:
-        model_parameters = self.parameters['model']
+        model_parameters = copy.deepcopy(self.parameters['model'])
 
         return self.__fill_parameters__(trial, model_parameters, is_root=True)
 
     def __fill_parameters__(self, trial: optuna.Trial, parameters: Dict, is_root: bool = False, namespace: str = '') -> Dict:
         result = parameters
 
-        if is_root and result['class'] == 'multi-model':
-            result['parameters']['class'] = self.__suggest_parameter__(trial, result['parameters']['class'], 'class')
+        if is_root and result['class'] == multi_model_key:
+            new_parameters = dict()
+
+            new_parameters['class'] = self.__suggest_parameter__(trial, result['parameters']['class'], 'class')
             # Filter out other model configurations
-            result['parameters']['parameters'] = result['parameters']['parameters'][result['parameters']['class']]
+            new_parameters['parameters'] = result['parameters']['parameters'][new_parameters['class']]
+
+            result = new_parameters
 
         for key, value in result.items():
             is_value_dict = isinstance(value, Dict)
@@ -130,7 +210,7 @@ class OptunaOptimizer(BaseOptimizer):
             if not is_value_dict:
                 continue
 
-            name = namespace + '.' + key
+            name = '' if is_root else (namespace + ('.' if len(namespace) > 0 else '') + key)
 
             if 'optimize' in value:
                 result[key] = self.__suggest_parameter__(trial, value, name=name)
@@ -142,13 +222,15 @@ class OptunaOptimizer(BaseOptimizer):
 
     @staticmethod
     def __suggest_parameter__(trial: optuna.Trial, value, name):
-        parameters = value.get('parameters') or []
+        parameters = value.get('parameters') or dict()
 
         match value['type']:
             case 'float':
                 return trial.suggest_float(name=name, **parameters)
             case 'categorical':
                 return trial.suggest_categorical(name=name, **parameters)
+            case 'bool':
+                return trial.suggest_categorical(name=name, choices=[True, False])
             case 'int':
                 return trial.suggest_int(name=name, **parameters)
             case 'discrete_uniform':
@@ -157,3 +239,5 @@ class OptunaOptimizer(BaseOptimizer):
                 return trial.suggest_loguniform(name=name, **parameters)
             case 'uniform':
                 return trial.suggest_uniform(name=name, **parameters)
+            case _:
+                raise ValueError(f"Unknown type '{value['type']}' presented for name { name }")

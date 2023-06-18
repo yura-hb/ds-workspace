@@ -4,27 +4,45 @@ generated using Kedro 0.18.9
 """
 
 import functools
+
+from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, Union, Optional
+from numbers import Real
+from enum import auto
+from strenum import StrEnum
 
 import optuna
 from kedro.pipeline import Pipeline, pipeline, node
 
 from .nodes import train
 
+# TODO: - Implement optuna optimization for custom model with its own metric
+# TODO: - Implement custom parameters such as sample weight
+# TODO: - Implement caching of some models
+
+# TODO: - Visualization:
+#   1. Weights distribution
+#   2.
+
 
 @dataclass
-class Configuration:
-    # If True, then `X_test`, `y_test` values will be used for evaluation. Otherwise, `X_train` and `y_train` will be
-    # used.
-    validate: bool = True
-    # A dict of custom models to use. The key must correspond to the key in pipeline parameters. For instance, if
-    # in parameters there is a `custom.abc.some_model`, then the model key must be `abc.some_model`
-    model: Dict[str, Any] = None
-    # A dict of custom metrics to use. The key must correspond to the key in pipeline parameters. For instance, if
-    # in parameters there is a `custom.some.metric`, then the model key must be `some.metric`.
-    # The metric can return either a **dictionary** or a single value.
-    metrics: Dict[str, Callable] = None
+class OptunaConfiguration:
+    @dataclass
+    class Result:
+        class Kind(StrEnum):
+            best_model = auto()
+            top_k_models = auto()
+            # In case of `multi-class` model this will return the best model in each model class
+            best_per_class_models = auto()
+            # Inc ase of `multi-class` model this will return the top k models in each model class
+            top_k_per_class_models = auto()
+
+        kind: Kind = field(default=Kind.best_model)
+        value: Optional[Any] = field(default=None)
+
+    # Optuna study name
+    study_name: str = None
     # Optuna sampler. The sampler will be used only `custom` value is specified for `class` key in the parameters
     sampler: optuna.samplers.BaseSampler = None
     # Custom parameters used for sampler construction. You can specify here methods and values,
@@ -37,12 +55,29 @@ class Configuration:
     # which can be used for pruner construction.
     # Note, it is discarded, if pruner is not None.
     pruner_parameters: Dict[str, Callable] = field(default_factory=dict)
+    # The result, which is returned by the optimizer
+    # Supported variants
+    result: Result = field(default=Result(Result.Kind.best_model))
 
-    # TODO - Improve
-    return_model: bool = True
+
+@dataclass
+class Configuration:
+    # If True, then `X_test`, `y_test` values will be used for evaluation. Otherwise, `X_train` and `y_train` will be
+    # used.
+    validate: bool = True
+    # A dict of custom models to use. The key must correspond to the key in pipeline parameters. For instance, if
+    # in parameters there is a `custom.abc.some_model`, then the model key must be `abc.some_model`
+    model: Dict[str, Any] = None
+    # A dict of custom metrics to use. The key must correspond to the key in pipeline parameters. For instance, if
+    # in parameters there is a `custom.some.metric`, then the model key must be `some.metric`.
+    # The metric is a function, which accepts `y_true`, `y_pred` as parameters and can return either named dictionary
+    # or a single value
+    metrics: Dict[str, Callable[[Any, Any], Union[OrderedDict | Real]]] = None
+    # Configuration of optuna
+    optuna_configuration: OptunaConfiguration = field(default_factory=OptunaConfiguration)
 
 
-def create_pipeline(configuration=Configuration(), **kwargs) -> Pipeline:
+def create_pipeline(configuration, **kwargs) -> Pipeline:
     __train__ = functools.partial(train, configuration=configuration)
 
     if not configuration.validate:
@@ -57,7 +92,7 @@ def create_pipeline(configuration=Configuration(), **kwargs) -> Pipeline:
         node(
             __train__,
             inputs=inputs,
-            outputs=[],
+            outputs=["models", "params", "metrics"],
             name=kwargs.get("name")
         )
     ])
