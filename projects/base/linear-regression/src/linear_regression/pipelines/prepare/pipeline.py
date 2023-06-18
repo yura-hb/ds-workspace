@@ -14,14 +14,13 @@ import linear_regression.shared.train_test_split.pipeline as train_test_split_pi
 import linear_regression.shared.fold_split.pipeline as fold_split_pipeline
 import linear_regression.shared.drop_zero_columns.pipeline as drop_zero_columns
 import linear_regression.shared.drop_columns.pipeline as drop_columns
-import linear_regression.shared.one_hot_encode.pipeline as one_hot_encode
 import linear_regression.shared.date_to_float.pipeline as date_to_float
 import linear_regression.shared.plot_corr_matrix.pipeline as plot_corr_matrix
 import linear_regression.shared.fill_na.pipeline as fill_na
 import linear_regression.shared.drop_constant_columns.pipeline as drop_constant_columns
 
 
-def make_preprocess_pipeline(**kwargs) -> Pipeline:
+def make_preprocess_pipeline() -> Pipeline:
     return pipeline([
         # X preprocessing
         modular_pipeline(take_columns_pipeline.create_pipeline(),
@@ -30,9 +29,6 @@ def make_preprocess_pipeline(**kwargs) -> Pipeline:
         node(process,
              inputs=['X_orig'],
              outputs='X_encoded_0'),
-        # modular_pipeline(one_hot_encode.create_pipeline(),
-        #                  inputs={"dataset": "X_encoded_0"},
-        #                  outputs={"dataset_out": "X_encoded_1"}),
         modular_pipeline(date_to_float.create_pipeline(),
                          inputs={"dataset": "X_encoded_0"},
                          outputs={"dataset_out": "X_encoded_2"}),
@@ -65,11 +61,15 @@ def make_preprocess_pipeline(**kwargs) -> Pipeline:
 
 
 def split_pipeline(**kwargs) -> Pipeline:
-    split_pipeline, output_sets = fold_split_pipeline.create_pipeline(folds=5, return_output_sets=True)
+    n_splits = kwargs['n_splits']
+    split_pipeline, output_sets = train_test_split_pipeline.create_pipeline(sets=["X", "y"])
+    split_cv_pipeline, output_sets = fold_split_pipeline.create_pipeline(n_splits=n_splits,
+                                                                      suffixes=['train', 'valid'],
+                                                                      return_output_sets=True)
 
     return pipeline([
-        modular_pipeline(train_test_split_pipeline.create_pipeline(sets=["X", "y"])),
-        modular_pipeline(split_pipeline, inputs={"X": "X_train", "y": "y_train"})
+        modular_pipeline(split_pipeline),
+        modular_pipeline(split_cv_pipeline, inputs={"X": "X_train", "y": "y_train"})
     ], inputs=['X', 'y'],
        outputs=['X_test', 'y_test', *output_sets],
        namespace="split")
@@ -77,8 +77,7 @@ def split_pipeline(**kwargs) -> Pipeline:
 
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
-        modular_pipeline(make_info_pipeline.create_pipeline(),
-                         outputs={"info": "all_columns_info"}),
+        modular_pipeline(make_info_pipeline.create_pipeline(), outputs={"info": "all_columns_info"}),
         make_preprocess_pipeline(),
-        split_pipeline()
+        split_pipeline(**kwargs)
     ])

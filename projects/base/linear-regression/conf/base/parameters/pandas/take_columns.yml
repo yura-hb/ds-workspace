@@ -10,11 +10,11 @@ take_column_parameters:
   exclude: False
 
 data_preprocess.take_X_parameters:
-  columns: ['MinTemp', 'MeanTemp', 'MaxTemp']
+  columns: ['MeanTemp']
   # If true then will return all columns excluding the columns mentioned in columns
   exclude: True
 
 data_preprocess.take_y_parameters:
-  columns: ['MinTemp', 'MeanTemp', 'MaxTemp']
+  columns: ['MeanTemp']
   # If true then will return all columns excluding the columns mentioned in columns
   exclude: False

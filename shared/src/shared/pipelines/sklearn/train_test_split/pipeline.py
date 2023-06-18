@@ -23,4 +23,4 @@ def create_pipeline(**kwargs) -> Pipeline:
             outputs=output_sets,
             name=kwargs.get("name")
         )
-    ])
+    ]), output_sets

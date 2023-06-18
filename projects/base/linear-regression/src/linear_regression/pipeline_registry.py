@@ -1,8 +1,10 @@
 """Project pipelines."""
 from typing import Dict
 
-from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
+
+import linear_regression.pipelines.model.pipeline as model_pipeline
+import linear_regression.pipelines.prepare.pipeline as prepare_pipeline
 
 
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -11,7 +13,13 @@ def register_pipelines() -> Dict[str, Pipeline]:
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
-    pipelines = find_pipelines()
-    print(f"[[DEBUG]] {pipelines}")
+    parameters = dict(n_splits=5)
+
+    pipelines = {
+        "prepare": prepare_pipeline.create_pipeline(**parameters),
+        "model": model_pipeline.create_pipeline(**parameters)
+    }
+
     pipelines["__default__"] = sum(pipelines.values())
+
     return pipelines

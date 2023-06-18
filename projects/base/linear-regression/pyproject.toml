@@ -28,3 +28,5 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 "../../../shared/dist/date_to_float-0.1.tar.gz" = {alias="date_to_float", destination = "shared"}
 "../../../shared/dist/fill_na-0.1.tar.gz" = {alias="fill_na", destination = "shared"}
 "../../../shared/dist/plot_corr_matrix-0.1.tar.gz" = {alias="plot_corr_matrix", destination = "shared"}
+
+"../../../shared/dist/train-0.1.tar.gz" = {alias="train", destination = "shared"}

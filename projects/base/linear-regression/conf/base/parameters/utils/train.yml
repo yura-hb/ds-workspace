@@ -1,0 +1,137 @@
+# This is a boilerplate parameters config generated for pipeline 'train'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+train_parameters: &params
+
+  model:
+    # The class of the model which can be
+    # * `sklearn.model_path`, which specifies the import model path from sklearn library. The parameters are the same as
+    #    in sklearn
+    # * `multi-model`, which specifies multiple models. It expects parameters in the following form
+    # ```
+    # parameters:
+    #   class:
+    #     optimize: True
+    #     type: categorical
+    #     values: ['sklearn.model_one', 'custom.model_1', ...]
+    #   parameters:
+    #     sklearn.model_one:
+    #       alpha: ...
+    # ```
+    #   Note, that you must always specify hyperparameter optimization, even if parameters aren't affected
+    # * `custom.model`, which specifies custom model
+    class: 'sklearn.linear_model.Ridge'
+    # Parameters of the model to train. If you want to perform optimization, you must specify the parameter in
+    # the following form
+    # ```
+    # parameters:
+    #   parameter_1:
+    #     optimize: True
+    #     type: float|categorical|discrete_uniform|int|log_uniform|uniform
+    #     parameters:
+    #       ...
+    # ```
+    # The name of the parameter in trial will be set to `parameter_1` or the path, if the value is nested.
+    # Possible value for optimized value parameters can be found in official docs:
+    # https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html#optuna.trial.Trial
+    parameters:
+      alpha:
+        optimize: True
+        type: float
+        parameters:
+          low: 0.0
+          high: 1.0
+      fit_intercept:
+        optimize: True
+        type: bool
+      copy_X: True
+      tol: 0.0001
+      solver: 'auto'
+      positive:
+        optimize: True
+        type: bool
+      random_state: 42
+
+  # A list of metrics to compute.
+  # The metric is defined in format `namespace.name`.
+  #  * For `sklearn` metric read possible options in https://scikit-learn.org/stable/modules/model_evaluation.html#common-cases-predefined-values
+  #  * You can specify `custom` metric, but remember that it should return either `Dict` or `float`. The actual metric
+  #    function is given in the `Configuration` object during pipeline creation
+  metrics:
+    sklearn.mean_squared_error:
+    sklearn.mean_squared_error_2:
+      class: 'mean_squared_error'
+      squared: False
+    custom.average_distance:
+      squared: False
+
+  # The parameters for optuna hyperparameter optimization.
+  # If you don't need it, then just remove or comment them all
+  optuna_parameters:
+    # The name of study
+    study_name: some_study
+    # Number of trials
+    # n_trials: 100
+    # DB storage to persist. Should be a path to SQL database
+    # storage:
+    # Number of jobs
+    n_jobs: 1
+    # If garbage should be collected
+    gc_after_trial: True
+    # Show_progress_bar
+    show_progress_bar: False
+    # Will load study, if such exists in database
+    # load_if_exists: False
+    # Direction of optimization. Either minimize or maximize
+    # direction: 'minimize'
+    # Directions of optimization, if you are using multiple metrics
+    directions: ['minimize', 'minimize', 'minimize']
+    # Metric names. There should be the same number as the number of directions
+    metric_names: ['mse', 'rmse', 'some']
+
+    # Read optuna docs
+    # https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html
+    # * Note, the implementation support nester sampler.
+    # * In case, if you need to provide custom function for some sampler, you must them provide them dynamically in
+    #   `Configuration` object during pipeline creation
+    # * Set 'custom' to provide custom sampler
+    # * If you need to provide custom args, you can add them dynamically in `Configuration.OptunaConfiguration` object
+    sampler:
+      class: 'GridSampler'
+      parameters:
+        search_space:
+          alpha: [0.0, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+          fit_intercept: [True, False]
+          positive: [True, False]
+        seed: 42
+
+    # Read optuna docs
+    # https://optuna.readthedocs.io/en/stable/reference/generated/optuna.pruners.MedianPruner.html#optuna.pruners.MedianPruner
+    # * Note, the implementation supports nested pruner for `PatiencePruner`
+    # * Set 'custom' to provide custom sampler
+    # * If you need to provide custom args, you can add them dynamically in `Configuration.OptunaConfiguration` object
+    pruner:
+      class: 'MedianPruner'
+      parameters:
+        n_startup_trials: 10
+        n_warmup_steps: 10
+        interval_steps: 10
+
+
+train_split_0.train_parameters:
+  <<: *params
+
+train_split_1.train_parameters:
+  <<: *params
+
+train_split_2.train_parameters:
+  <<: *params
+
+train_split_3.train_parameters:
+  <<: *params
+
+train_split_4.train_parameters:
+  <<: *params

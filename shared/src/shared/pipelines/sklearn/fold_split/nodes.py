@@ -9,6 +9,7 @@ from sklearn.model_selection import KFold, StratifiedKFold, StratifiedGroupKFold
 
 log = logging.getLogger(__name__)
 
+
 def __make_split__(split_class, n_folds, parameters):
     return split_class(n_splits=n_folds, **parameters)
 
@@ -38,8 +39,8 @@ def split(X, y, parameters, n_folds: int = 1):
     fold_split, split_data = __make_fold_split__(X, y, parameters, n_folds)
     out = []
 
-    for train_idx, test_idx in fold_split.split(X, y):
-        X_train, X_val, y_train, y_val = X.iloc[train_idx, :], X.iloc[train_idx, :], y.iloc[test_idx, :], y.iloc[test_idx, :]
+    for train_idx, test_idx in fold_split.split(*split_data):
+        X_train, X_val, y_train, y_val = X.iloc[train_idx, :], X.iloc[test_idx, :], y.iloc[train_idx, :], y.iloc[test_idx, :]
 
         out += [X_train, X_val, y_train, y_val]
 

@@ -1,0 +1,27 @@
+[tool.kedro]
+package_name = "l2_shared"
+project_name = "l2_shared"
+kedro_init_version = "0.18.9"
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = """
+--cov-report term-missing \
+--cov src/l2_shared -ra"""
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.kedro.micropkg.package]
+"pipelines.cross_validate"={}
+"pipelines.train"={}
+
+[tool.kedro.micropkg.pull]
+"../shared/dist/fold_split-0.2.tar.gz" = {alias="fold_split", destination = "pipelines/cross_validate"}
+"../shared/dist/train_test_split-0.2.tar.gz" = {alias="train_test_split", destination = "pipelines/cross_validate"}
+"../shared/dist/regression_analysis-0.1.tar.gz" = {alias="regression_analysis", destination = "pipelines/regression_analysis"}
+"../shared/dist/classification_analysis-0.1.tar.gz" = {alias="classification_analysis", destination = "pipelines/classification_analysis"}

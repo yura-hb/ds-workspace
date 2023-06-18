@@ -10,20 +10,28 @@ from .nodes import split
 from typing import Union, Tuple, List
 
 
-def create_pipeline(**kwargs) -> Union[Pipeline | Tuple[Pipeline, List]]:
-    assert "folds" in kwargs, "Expect 'folds' parameter specifying the number of splits"
+def create_pipeline(
+   n_splits: int,
+   sets: List[str] = None,
+   suffixes: List[str] = None,
+   return_output_sets: bool = True, **kwargs
+) -> Union[Pipeline | Tuple[Pipeline, List]]:
+    if sets is None:
+        sets = ['X', 'y']
 
-    sets = kwargs.get("sets") or ["X", "y"]
-    folds = kwargs["folds"]
-    output_sets = []
+    if suffixes is None:
+        suffixes = ['X', 'y']
 
     assert len(sets) == 2, "Expect, that sets parameter is of length 2"
+    assert len(suffixes) == 2, "Expect, that suffixes parameter is of length 2"
 
-    for i in range(folds):
+    output_sets = []
+
+    for i in range(n_splits):
         for dataset in sets:
-            output_sets += [f"{dataset}_train_{i}", f"{dataset}_val_{i}"]
+            output_sets += [f"{dataset}_{suffix}_{i}" for suffix in suffixes]
 
-    _split = functools.partial(split, n_folds=folds)
+    _split = functools.partial(split, n_folds=n_splits)
     _split = functools.update_wrapper(_split, split)
 
     out_pipeline = pipeline([
@@ -34,8 +42,6 @@ def create_pipeline(**kwargs) -> Union[Pipeline | Tuple[Pipeline, List]]:
             name=kwargs.get("name")
         )
     ])
-
-    return_output_sets = kwargs.get("return_output_sets") or False
 
     if return_output_sets:
         return out_pipeline, output_sets

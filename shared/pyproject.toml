@@ -20,8 +20,6 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 # SKLearn
 "pipelines.sklearn.fold_split"={}
 "pipelines.sklearn.train_test_split"={}
-"pipelines.sklearn.train_lig_reg"={}
-"pipelines.sklearn.train_log_reg"={}
 # Pandas
 "pipelines.pandas.take_columns"={}
 "pipelines.pandas.make_info"={}
@@ -34,3 +32,6 @@ exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
 "pipelines.pandas.fill_na"={}
 # Plotly
 "pipelines.plotly.plot_corr_matrix"={}
+# Utils
+"pipelines.utils.train"={}
+"pipelines.utils.evaluate"={}

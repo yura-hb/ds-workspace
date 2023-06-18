@@ -3,7 +3,6 @@ This is a boilerplate pipeline 'date_to_float'
 generated using Kedro 0.18.9
 """
 
-import numpy as np
 import pandas as pd
 
 
@@ -35,3 +34,4 @@ def convert_date_to_float(dataset, parameters):
         dataset[column] = date
 
     return dataset
+

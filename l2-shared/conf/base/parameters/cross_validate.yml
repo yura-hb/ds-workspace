@@ -1,0 +1,18 @@
+# This is a boilerplate parameters config generated for pipeline 'cross_validate'
+# using Kedro 0.18.9.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.18.9/kedro_project_setup/configuration.html#parameters
+
+cross_validate.parameters:
+
+  train_test_split.parameters:
+    train_size: 0.75
+    random_state: 42
+    shuffle: True
+
+  fold_split.parameters:
+    shuffle: True
+    random_state: 42
+    group_column: None
+    stratify: False

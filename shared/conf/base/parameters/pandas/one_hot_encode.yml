@@ -14,3 +14,4 @@ one_hot_encode_parameters:
   columns: []
   sparse: False
   drop_first: False
+  preserve_columns: False
